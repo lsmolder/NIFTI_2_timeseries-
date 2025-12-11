@@ -10,15 +10,15 @@ def batch_process(data_dir, atlas_path, output_dir=None, mask_path=None):
     """
     
     # The pattern based on user description:
-    # sub-AS*_dir-*_ses-0*_task-rest_run-*_part-mag_bold_RAS_combined_cleaned.nii.gz
-    # We will use a slightly more general pattern to be safe, but specific enough:
-    # "*cleaned.nii.gz" seems to be the distinctive suffix.
+    # conf_correction* -> confound_correction_datasink -> cleaned_timeseries -> *"sub-name"*"ses-0#"* -> "sub-name"*
+    # Since the structure is deep and variable, using a recursive glob with the filename suffix is the most robust approach.
+    # We look for any file ending in 'cleaned.nii.gz' anywhere under the data_dir.
     search_pattern = "**/*cleaned.nii.gz"
     
     print(f"Searching for files in: {data_dir}")
-    print(f"Pattern: {search_pattern}")
+    print(f"Pattern: {search_pattern} (recursive)")
     
-    # recursive=True allows ** to match subdirectories
+    # recursive=True allows ** to match subdirectories of any depth
     files = glob.glob(os.path.join(data_dir, search_pattern), recursive=True)
     
     if not files:
