@@ -23,12 +23,8 @@ This tool extracts mean BOLD signal time series from 4D fMRI NIfTI files using a
 2.  **Set up the environment**:
     You can use the provided helper script to create a virtual environment and install dependencies:
 
-    ```bash
-    ./setup_env.sh
-    source venv/bin/activate
-    ```
 
-    *Alternatively, install manually:*
+    *install manually:*
     ```bash
     pip install -r requirements.txt
     ```
