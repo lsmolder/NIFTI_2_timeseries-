@@ -77,9 +77,29 @@ python batch_extract.py data/ my_atlas.nii.gz
 
 This will automatically find all `*cleaned.nii.gz` files and create a corresponding `_timeseries.csv` file in the same folder.
 
+**Excluding Specific Runs or Subjects:**
+
+If certain scans have incorrect settings or you want to exclude specific subjects, use the `--exclude-runs` or `--exclude-subjects` options:
+
+```bash
+# Exclude run-02 from all subjects
+python batch_extract.py data/ my_atlas.nii.gz --exclude-runs run-02
+
+# Exclude multiple runs
+python batch_extract.py data/ my_atlas.nii.gz --exclude-runs run-01,run-03
+
+# Exclude specific subjects
+python batch_extract.py data/ my_atlas.nii.gz --exclude-subjects sub-05,sub-12
+
+# Combine both exclusions
+python batch_extract.py data/ my_atlas.nii.gz --exclude-runs run-02 --exclude-subjects sub-05
+```
+
 **Options:**
 *   `--mask`: Use a common binary mask for all subjects.
 *   `--output_dir`: Save all resulting CSVs into a single folder instead of next to the original files.
+*   `--exclude-runs`: Exclude specific runs by providing a comma-separated list of run identifiers (e.g., `--exclude-runs run-01,run-03`).
+*   `--exclude-subjects`: Exclude specific subjects by providing a comma-separated list of subject identifiers (e.g., `--exclude-subjects sub-01,sub-05`).
 
 ### Using in VS Code
 
