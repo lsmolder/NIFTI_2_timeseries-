@@ -2,6 +2,7 @@ import os
 import argparse
 import glob
 import sys
+import re
 from extract_timeseries import extract_timeseries
 
 def batch_process(data_dir, atlas_path, output_dir=None, mask_path=None, exclude_runs=None, exclude_subjects=None):
@@ -45,7 +46,10 @@ def batch_process(data_dir, atlas_path, output_dir=None, mask_path=None, exclude
             if exclude_runs:
                 exclude_file = False
                 for run_id in exclude_runs:
-                    if run_id in file_path:
+                    # Use word boundary pattern to avoid matching 'run-1' with 'run-10'
+                    # This looks for the run_id followed by a non-alphanumeric character or end of string
+                    pattern = re.escape(run_id) + r'(?:[^a-zA-Z0-9]|$)'
+                    if re.search(pattern, file_path):
                         print(f"  Excluding (run): {file_path}")
                         exclude_file = True
                         break
@@ -56,7 +60,10 @@ def batch_process(data_dir, atlas_path, output_dir=None, mask_path=None, exclude
             if exclude_subjects:
                 exclude_file = False
                 for subject_id in exclude_subjects:
-                    if subject_id in file_path:
+                    # Use word boundary pattern to avoid matching 'sub-1' with 'sub-10'
+                    # This looks for the subject_id followed by a non-alphanumeric character or end of string
+                    pattern = re.escape(subject_id) + r'(?:[^a-zA-Z0-9]|$)'
+                    if re.search(pattern, file_path):
                         print(f"  Excluding (subject): {file_path}")
                         exclude_file = True
                         break
