@@ -4,9 +4,17 @@ import glob
 import sys
 from extract_timeseries import extract_timeseries
 
-def batch_process(data_dir, atlas_path, output_dir=None, mask_path=None):
+def batch_process(data_dir, atlas_path, output_dir=None, mask_path=None, exclude_runs=None, exclude_subjects=None):
     """
     Recursively finds all 4D fMRI files matching the pattern and extracts time series.
+    
+    Parameters:
+    - data_dir: Root directory containing subject folders.
+    - atlas_path: Path to the ROI Atlas NIfTI file.
+    - output_dir: (Optional) Directory to save all output CSVs.
+    - mask_path: (Optional) Path to a common binary mask file.
+    - exclude_runs: (Optional) List of run identifiers to exclude.
+    - exclude_subjects: (Optional) List of subject identifiers to exclude.
     """
     
     # The pattern based on user description:
@@ -26,6 +34,44 @@ def batch_process(data_dir, atlas_path, output_dir=None, mask_path=None):
         return
 
     print(f"Found {len(files)} files to process.")
+    
+    # Filter out excluded runs and subjects
+    if exclude_runs or exclude_subjects:
+        original_count = len(files)
+        filtered_files = []
+        
+        for file_path in files:
+            # Check if file should be excluded based on run identifiers
+            if exclude_runs:
+                exclude_file = False
+                for run_id in exclude_runs:
+                    if run_id in file_path:
+                        print(f"  Excluding (run): {file_path}")
+                        exclude_file = True
+                        break
+                if exclude_file:
+                    continue
+            
+            # Check if file should be excluded based on subject identifiers
+            if exclude_subjects:
+                exclude_file = False
+                for subject_id in exclude_subjects:
+                    if subject_id in file_path:
+                        print(f"  Excluding (subject): {file_path}")
+                        exclude_file = True
+                        break
+                if exclude_file:
+                    continue
+            
+            # If not excluded, add to filtered list
+            filtered_files.append(file_path)
+        
+        files = filtered_files
+        print(f"After filtering: {len(files)} files remaining ({original_count - len(files)} excluded).")
+    
+    if not files:
+        print("No files remaining after exclusion filters!")
+        return
     
     # Create output directory if specified
     if output_dir:
@@ -80,6 +126,8 @@ if __name__ == "__main__":
     parser.add_argument("atlas_path", help="Path to the ROI Atlas NIfTI file.")
     parser.add_argument("--mask", help="(Optional) Path to a common binary mask file.", default=None)
     parser.add_argument("--output_dir", help="(Optional) Directory to save all output CSVs. If omitted, saves next to input files.", default=None)
+    parser.add_argument("--exclude-runs", help="(Optional) Comma-separated list of run identifiers to exclude (e.g., 'run-01,run-03')", default=None)
+    parser.add_argument("--exclude-subjects", help="(Optional) Comma-separated list of subject identifiers to exclude (e.g., 'sub-01,sub-05')", default=None)
     
     args = parser.parse_args()
     
@@ -90,5 +138,16 @@ if __name__ == "__main__":
     if not os.path.exists(args.atlas_path):
         print(f"Error: Atlas file {args.atlas_path} not found.")
         sys.exit(1)
+    
+    # Parse exclusion lists
+    exclude_runs = None
+    if args.exclude_runs:
+        exclude_runs = [run.strip() for run in args.exclude_runs.split(',')]
+        print(f"Excluding runs: {exclude_runs}")
+    
+    exclude_subjects = None
+    if args.exclude_subjects:
+        exclude_subjects = [sub.strip() for sub in args.exclude_subjects.split(',')]
+        print(f"Excluding subjects: {exclude_subjects}")
 
-    batch_process(args.data_dir, args.atlas_path, args.output_dir, args.mask)
+    batch_process(args.data_dir, args.atlas_path, args.output_dir, args.mask, exclude_runs, exclude_subjects)
