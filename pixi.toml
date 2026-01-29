@@ -1,0 +1,20 @@
+[project]
+name = "timeseries-tools"
+version = "0.1.0"
+description = "Tools for extracting and concatenating fMRI timeseries."
+channels = ["conda-forge"]
+platforms = ["linux-64", "osx-64", "osx-arm64", "win-64"]
+
+[dependencies]
+python = ">=3.8"
+pandas = "*"
+numpy = "*"
+nibabel = "*"
+nilearn = "*"
+scikit-learn = "*"
+scipy = "*"
+
+[tasks]
+extract = "python extract_timeseries.py"
+batch = "python batch_extract.py"
+concat = "python concat_timeseries.py"
